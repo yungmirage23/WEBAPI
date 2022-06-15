@@ -9,15 +9,25 @@ namespace WebApi.Controllers
     [Route("api/[controller]")]
     public class ItemsController : ControllerBase
     {
-        public int PageSize = 15;
+        private static int PageSize = 15;
         private IRepository itemRepository;
         public ItemsController(IRepository _rep)
         {
-            itemRepository= _rep;
+            itemRepository = _rep;
         }
         //GET api/items
         [HttpGet]
         public IEnumerable<Item> Get() => itemRepository.Items;
+
+        //GET api/items/count
+        [HttpGet("count")]
+        public int Count() => (from items in itemRepository.Items
+                               select items).Count();
+
+        [HttpGet("count/{category}")]
+        public int Count(string category)=> (from items in itemRepository.Items
+                                             where items.Category == category
+                                             select items).Count();
 
         //GET api/items/F74349D5-52B4-4A4A-0382-08DA02C684C5
         [HttpGet("{id:guid}")]
@@ -34,7 +44,13 @@ namespace WebApi.Controllers
         public IEnumerable<Item> Get(int productPage)=>itemRepository.Items
                 .Skip((productPage - 1) * PageSize)
                 .Take(PageSize);
-    
+        
+        //GET api/items/category/Горячие%20Блюда/page/2
+        [HttpGet("category/{category}/page/{productPage:int}")]
+        public IQueryable<Item> Get(string category,int productPage) => itemRepository.Items.Where(i => i.Category == category)
+                .Skip((productPage - 1) * PageSize)
+                .Take(PageSize);
+
 
         //GET api/items/categories
         [HttpGet("categories")]
