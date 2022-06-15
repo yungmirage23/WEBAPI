@@ -17,7 +17,7 @@ namespace WebApi.Controllers
         }
         //GET api/items
         [HttpGet]
-        public IEnumerable<Item> Get() => itemRepository.Items.ToList();
+        public IEnumerable<Item> Get() => itemRepository.Items;
 
         //GET api/items/F74349D5-52B4-4A4A-0382-08DA02C684C5
         [HttpGet("{id:guid}")]
@@ -29,8 +29,8 @@ namespace WebApi.Controllers
 
             return BadRequest();
         }
-        //GET api/items/take/2
-        [HttpGet("take/{productPage:int}")]
+        //GET api/items/page/2
+        [HttpGet("page/{productPage:int}")]
         public IEnumerable<Item> Get(int productPage)=>itemRepository.Items
                 .Skip((productPage - 1) * PageSize)
                 .Take(PageSize);
@@ -38,19 +38,19 @@ namespace WebApi.Controllers
 
         //GET api/items/categories
         [HttpGet("categories")]
-        public IEnumerable<string> Categories()=> itemRepository.Items
+        public IQueryable<string> Categories()=> itemRepository.Items
             .Select(x => x.Category)
             .Distinct();
 
         //GET api/item/categories/Десерты
         [HttpGet("categories/{category}")]
-        public IEnumerable<Item> Get(string category) =>
-            itemRepository.Items.Where(p => category == null || p.Category == category).ToList();
+        public IQueryable<Item> Get(string category) =>
+            itemRepository.Items.Where(p => category == null || p.Category == category);
 
 
         //POST api/items/add/{item}
         [HttpPost("add")]
-        public async Task<ActionResult<Item>> Post(Item item)
+        public ActionResult<Item> Post(Item item)
         {
             try
             {
@@ -58,7 +58,7 @@ namespace WebApi.Controllers
                 {
                     return BadRequest();
                 }
-                var repitem = itemRepository.Items.FirstOrDefault(i => i.Id == item.Id);
+                var repitem =itemRepository.Items.FirstOrDefault(i => i.Id == item.Id);
                 if (repitem != null)
                 {
                     repitem.Description = item.Description;
@@ -78,7 +78,7 @@ namespace WebApi.Controllers
         }
         //DELETE api/items/F74349D5-52B4-4A4A-0382-08DA02C684C5
         [HttpDelete("{id:guid}")]
-        public async Task<ActionResult<Item>> Delete(Guid id)
+        public ActionResult<Item> Delete(Guid id)
         {
             try
             {
